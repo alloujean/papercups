@@ -1,54 +1,12 @@
-# Builder stage
-FROM elixir:1.12-alpine AS builder
+# Utiliser l'image officielle Papercups
+FROM papercups/papercups:latest
 
-RUN apk add --no-cache git make gcc libc-dev python3 curl bash ncurses-libs nodejs npm
+# Variables d'environnement
+ENV MIX_ENV=prod
+ENV PORT=4000
 
-WORKDIR /app
-
-# Copy mix files
-COPY mix.exs ./
-COPY mix.lock* ./
-COPY config config
-
-# Get dependencies
-RUN mix local.hex --force && \
-    mix local.rebar --force && \
-    mix deps.get --only prod && \
-    mix deps.compile
-
-# Copy assets
-COPY assets assets
-ENV NODE_OPTIONS=--openssl-legacy-provider
-RUN npm install --prefix=assets && \
-    npm run build --prefix=assets
-
-# Copy source
-COPY priv priv
-COPY lib lib
-
-# Compile and digest
-RUN MIX_ENV=prod mix compile && \
-    MIX_ENV=prod mix phx.digest
-
-# Build release
-RUN mix release
-
-# Runtime stage
-FROM alpine:latest
-
-RUN apk add --no-cache openssl bash ncurses-libs
-
-WORKDIR /app
-
-# Copy release from builder
-COPY --from=builder /app/_build/prod/rel/chat_api ./
-
-# Expose port
+# Exposer le port
 EXPOSE 4000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD /app/bin/chat_api eval "ChatApi.Release.health_check()"
-
-# Run the release
-CMD ["/app/bin/chat_api", "start"]
+# Commande de démarrage
+CMD ["/entrypoint.sh", "run"]

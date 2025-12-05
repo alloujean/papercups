@@ -1,7 +1,10 @@
 # -----------------------------
 # Builder
 # -----------------------------
-FROM elixir:1.11.3-alpine as builder
+FROM node:20.17.0-alpine AS builder
+
+# Installer Elixir et dépendances
+RUN apk add --no-cache erlang git make gcc libc-dev python3 curl bash ncurses-libs
 
 # Arguments et variables d'environnement
 ARG MIX_ENV=prod
@@ -24,15 +27,8 @@ ENV BUCKET_NAME=$BUCKET_NAME
 ENV AWS_REGION=$AWS_REGION
 ENV PAPERCUPS_STRIPE_SECRET=$PAPERCUPS_STRIPE_SECRET
 
-# Créer le dossier de travail
-RUN mkdir /app
 WORKDIR /app
-
-# Installer dépendances de build et Node 20 / npm 11 de manière propre
-RUN apk add --no-cache git yarn python3 ca-certificates wget gnupg make erlang gcc libc-dev curl xz \
-    && curl -fsSL https://nodejs.org/dist/v20.17.0/node-v20.17.0-linux-x64.tar.xz \
-        | tar -xJ -C /usr/local --strip-components=1 \
-    && npm install -g npm@11.6.4
+RUN mkdir /app
 
 # -----------------------------
 # Client side
@@ -61,24 +57,21 @@ RUN mix deps.compile
 RUN mix phx.digest priv/static
 
 # Build release
-WORKDIR /app
 COPY rel rel
 RUN mix release papercups
 
 # -----------------------------
 # Final image
 # -----------------------------
-FROM alpine:3.13 AS app
-RUN apk add --no-cache openssl ncurses-libs
-ENV LANG=C.UTF-8
-EXPOSE 4000
+FROM alpine:3.18 AS app
+RUN apk add --no-cache openssl ncurses-libs bash
 
+EXPOSE 4000
 WORKDIR /app
 ENV HOME=/app
 
 RUN adduser -h /app -u 1000 -s /bin/sh -D papercupsuser
 
-# Copier le release Elixir / Phoenix
 COPY --from=builder --chown=papercupsuser:papercupsuser /app/_build/prod/rel/papercups /app
 COPY --from=builder --chown=papercupsuser:papercupsuser /app/priv /app/priv
 RUN chown -R papercupsuser:papercupsuser /app
@@ -87,7 +80,5 @@ COPY docker-entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh
 
 USER papercupsuser
-
-WORKDIR /app
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["run"]

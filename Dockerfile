@@ -1,6 +1,9 @@
+# -----------------------------
+# Builder
+# -----------------------------
 FROM elixir:1.11.3-alpine as builder
 
-# build step
+# Arguments et variables d'environnement
 ARG MIX_ENV=prod
 ARG NODE_ENV=production
 ARG APP_VER=0.0.1
@@ -21,30 +24,34 @@ ENV BUCKET_NAME=$BUCKET_NAME
 ENV AWS_REGION=$AWS_REGION
 ENV PAPERCUPS_STRIPE_SECRET=$PAPERCUPS_STRIPE_SECRET
 
-
+# Créer le dossier de travail
 RUN mkdir /app
 WORKDIR /app
 
-# Installer Node 20 et npm compatible
-RUN apk add --no-cache git yarn python3 ca-certificates wget gnupg make erlang gcc libc-dev curl && \
-    curl -fsSL https://nodejs.org/dist/v20.17.0/node-v20.17.0-linux-x64.tar.xz | tar -xJ -C /usr/local --strip-components=1 && \
-    npm install -g npm@11.6.4
+# Installer dépendances de build et Node 20 / npm 11 de manière propre
+RUN apk add --no-cache git yarn python3 ca-certificates wget gnupg make erlang gcc libc-dev curl xz \
+    && curl -fsSL https://nodejs.org/dist/v20.17.0/node-v20.17.0-linux-x64.tar.xz \
+        | tar -xJ -C /usr/local --strip-components=1 \
+    && npm install -g npm@11.6.4
 
-
+# -----------------------------
 # Client side
+# -----------------------------
 COPY assets/package.json assets/package-lock.json ./assets/
 RUN npm install --prefix=assets
 
-# fix because of https://github.com/facebook/create-react-app/issues/8413
+# Fix pour Create-React-App
 ENV GENERATE_SOURCEMAP=false
 
 COPY priv priv
 COPY assets assets
 RUN npm run build --prefix=assets
 
+# -----------------------------
+# Backend Elixir / Phoenix
+# -----------------------------
 COPY mix.exs mix.lock ./
 COPY config config
-
 RUN mix local.hex --force && \
     mix local.rebar --force && \
     mix deps.get --only prod
@@ -53,21 +60,25 @@ COPY lib lib
 RUN mix deps.compile
 RUN mix phx.digest priv/static
 
+# Build release
 WORKDIR /app
 COPY rel rel
 RUN mix release papercups
 
+# -----------------------------
+# Final image
+# -----------------------------
 FROM alpine:3.13 AS app
 RUN apk add --no-cache openssl ncurses-libs
 ENV LANG=C.UTF-8
 EXPOSE 4000
 
 WORKDIR /app
-
 ENV HOME=/app
 
 RUN adduser -h /app -u 1000 -s /bin/sh -D papercupsuser
 
+# Copier le release Elixir / Phoenix
 COPY --from=builder --chown=papercupsuser:papercupsuser /app/_build/prod/rel/papercups /app
 COPY --from=builder --chown=papercupsuser:papercupsuser /app/priv /app/priv
 RUN chown -R papercupsuser:papercupsuser /app

@@ -29,7 +29,9 @@ defmodule ChatApiWeb do
 
   def view do
     quote do
-      use Phoenix.Component
+      use Phoenix.View,
+        root: "lib/chat_api_web/templates",
+        namespace: ChatApiWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller,

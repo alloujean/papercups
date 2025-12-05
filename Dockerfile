@@ -32,6 +32,7 @@ FROM nginx:alpine
 
 # Copier le build React
 COPY --from=builder /app/assets/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exposer le port 80 pour Traefik
 EXPOSE 80

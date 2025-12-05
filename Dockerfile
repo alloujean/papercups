@@ -25,8 +25,11 @@ ENV PAPERCUPS_STRIPE_SECRET=$PAPERCUPS_STRIPE_SECRET
 RUN mkdir /app
 WORKDIR /app
 
-RUN apk add --no-cache git nodejs yarn python3 npm ca-certificates wget gnupg make erlang gcc libc-dev && \
-    npm install npm@latest -g
+# Installer Node 20 et npm compatible
+RUN apk add --no-cache git yarn python3 ca-certificates wget gnupg make erlang gcc libc-dev curl && \
+    curl -fsSL https://nodejs.org/dist/v20.17.0/node-v20.17.0-linux-x64.tar.xz | tar -xJ -C /usr/local --strip-components=1 && \
+    npm install -g npm@11.6.4
+
 
 # Client side
 COPY assets/package.json assets/package-lock.json ./assets/

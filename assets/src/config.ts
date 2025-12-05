@@ -33,9 +33,12 @@ export const isUserInvitationEmailEnabled =
 
 export const REACT_URL = env.REACT_APP_URL || 'app.papercups.io';
 
+// Use the same protocol as the current page, or fallback to the full URL if provided
 export const BASE_URL = isDev
   ? 'http://localhost:4000'
-  : `https://${REACT_URL}`;
+  : REACT_URL.startsWith('http') 
+    ? REACT_URL 
+    : `${window.location.protocol}//${REACT_URL}`;
 
 // In the dev environment, we use port 3000 and proxy API requests to 4000
 export const FRONTEND_BASE_URL = isDev ? 'http://localhost:3000' : BASE_URL;

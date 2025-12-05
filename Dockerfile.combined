@@ -1,0 +1,23 @@
+# Dockerfile combiné - Frontend + Backend dans le même conteneur
+FROM papercups/papercups:latest
+
+# Installer Nginx
+RUN apk add --no-cache nginx
+
+# Copier la configuration Nginx
+COPY nginx-combined.conf /etc/nginx/http.d/default.conf
+
+# Créer le dossier pour les fichiers statiques
+RUN mkdir -p /usr/share/nginx/html
+
+# Copier les fichiers frontend buildés (on les build dans une étape séparée)
+# Pour l'instant, on utilise le frontend servi par Phoenix
+
+# Exposer les ports
+EXPOSE 80 4000
+
+# Script de démarrage
+COPY start-combined.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]

@@ -61,7 +61,7 @@ defmodule ChatApiWeb do
   defp view_helpers do
     quote do
       # Import basic rendering functionality (render, render_layout, etc)
-      import Phoenix.Component
+      import Phoenix.View
 
       import ChatApiWeb.ErrorHelpers
       import ChatApiWeb.Gettext

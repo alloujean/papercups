@@ -18,6 +18,7 @@ RUN mix local.hex --force && \
 
 # Copy assets
 COPY assets assets
+ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN npm install --prefix=assets && \
     npm run build --prefix=assets
 

@@ -29,9 +29,7 @@ defmodule ChatApiWeb do
 
   def view do
     quote do
-      use Phoenix.View,
-        root: "lib/chat_api_web/templates",
-        namespace: ChatApiWeb
+      use Phoenix.Component
 
       # Import convenience functions from controllers
       import Phoenix.Controller,
@@ -61,7 +59,7 @@ defmodule ChatApiWeb do
   defp view_helpers do
     quote do
       # Import basic rendering functionality (render, render_layout, etc)
-      import Phoenix.View
+      import Phoenix.Component
 
       import ChatApiWeb.ErrorHelpers
       import ChatApiWeb.Gettext

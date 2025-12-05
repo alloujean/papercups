@@ -22,7 +22,7 @@ COPY priv priv
 # Définir la variable pour OpenSSL legacy
 ENV NODE_OPTIONS=--openssl-legacy-provider
 
-# Build React - Force rebuild v3
+# Build React - Force rebuild v4 - URLs relatives
 RUN npm run build --prefix=assets
 
 # -----------------------------

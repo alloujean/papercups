@@ -1,23 +1,13 @@
-# Dockerfile combiné - Frontend + Backend dans le même conteneur
+# Dockerfile combiné - Utilise l'image officielle Papercups
+# Phoenix sert déjà le frontend et le backend sur le même port
 FROM papercups/papercups:latest
 
-# Installer Nginx
-RUN apk add --no-cache nginx
+# Variables d'environnement
+ENV MIX_ENV=prod
+ENV PORT=4000
 
-# Copier la configuration Nginx
-COPY nginx-combined.conf /etc/nginx/http.d/default.conf
-
-# Créer le dossier pour les fichiers statiques
-RUN mkdir -p /usr/share/nginx/html
-
-# Copier les fichiers frontend buildés (on les build dans une étape séparée)
-# Pour l'instant, on utilise le frontend servi par Phoenix
-
-# Exposer les ports
-EXPOSE 80 4000
+# Exposer le port
+EXPOSE 4000
 
 # Script de démarrage
-COPY start-combined.sh /start.sh
-RUN chmod +x /start.sh
-
-CMD ["/start.sh"]
+CMD ["/bin/sh", "-c", "sleep 5 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh run"]

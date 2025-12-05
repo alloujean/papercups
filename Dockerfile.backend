@@ -8,5 +8,5 @@ ENV PORT=4000
 # Exposer le port
 EXPOSE 4000
 
-# Commande de démarrage
-CMD ["/entrypoint.sh", "run"]
+# Script de démarrage avec migrations
+CMD ["/bin/sh", "-c", "/entrypoint.sh db createdb; /entrypoint.sh db migrate; /entrypoint.sh run"]

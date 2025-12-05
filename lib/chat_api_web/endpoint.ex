@@ -58,16 +58,18 @@ defmodule ChatApiWeb.Endpoint do
   plug(Plug.Session, @session_options)
 
   plug(Corsica,
-    origins: fn origin ->
-      case System.get_env("REACT_APP_URL") do
-        nil -> true
-        allowed_origin -> String.starts_with?(origin, allowed_origin)
-      end
-    end,
+    origins: &ChatApiWeb.Endpoint.cors_origins/1,
     allow_credentials: true,
     allow_headers: ["Content-Type", "Authorization"],
     log: [rejected: :error, invalid: :warn, accepted: :debug]
   )
 
   plug(ChatApiWeb.Router)
+
+  def cors_origins(origin) do
+    case System.get_env("REACT_APP_URL") do
+      nil -> true
+      allowed_origin -> String.starts_with?(origin, allowed_origin)
+    end
+  end
 end

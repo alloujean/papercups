@@ -1,6 +1,7 @@
 import request from 'superagent';
 import qs from 'query-string';
 import {getAuthTokens} from './storage';
+import {BASE_URL} from './config';
 import {
   Account,
   BrowserSession,
@@ -75,20 +76,20 @@ export const me = async (token = getAccessToken()): Promise<User> => {
   }
 
   return request
-    .get(`/api/me`)
+    .get(`${BASE_URL}/api/me`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
 
 export const login = async ({email, password}: LoginParams) => {
   return request
-    .post(`/api/session`)
+    .post(`${BASE_URL}/api/session`)
     .send({user: {email, password}})
     .then((res) => res.body.data);
 };
 
 export const logout = async () => {
-  return request.delete(`/api/session`).then((res) => res.body);
+  return request.delete(`${BASE_URL}/api/session`).then((res) => res.body);
 };
 
 export const register = async ({
@@ -99,7 +100,7 @@ export const register = async ({
   passwordConfirmation,
 }: RegisterParams) => {
   return request
-    .post(`/api/registration`)
+    .post(`${BASE_URL}/api/registration`)
     .send({
       user: {
         company_name: companyName,
@@ -118,21 +119,21 @@ export const renew = async (token = getRefreshToken()) => {
   }
 
   return request
-    .post(`/api/session/renew`)
+    .post(`${BASE_URL}/api/session/renew`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
 
 export const verifyUserEmail = async (verificationToken: string) => {
   return request
-    .post(`/api/verify_email`)
+    .post(`${BASE_URL}/api/verify_email`)
     .send({token: verificationToken})
     .then((res) => res.body.data);
 };
 
 export const sendPasswordResetEmail = async (email: string) => {
   return request
-    .post(`/api/reset_password`)
+    .post(`${BASE_URL}/api/reset_password`)
     .send({email})
     .then((res) => res.body.data);
 };
@@ -142,7 +143,7 @@ export const attemptPasswordReset = async (
   {password, passwordConfirmation}: ResetPasswordParams
 ) => {
   return request
-    .put(`/api/reset_password`)
+    .put(`${BASE_URL}/api/reset_password`)
     .send({
       password,
       password_confirmation: passwordConfirmation,
@@ -156,7 +157,7 @@ export const createNewCustomer = async (
   params: Partial<Customer>
 ) => {
   return request
-    .post(`/api/customers`)
+    .post(`${BASE_URL}/api/customers`)
     .send({
       customer: {
         first_seen: now(),
@@ -177,7 +178,7 @@ export const fetchCustomers = async (
   }
 
   return request
-    .get(`/api/customers`)
+    .get(`${BASE_URL}/api/customers`)
     .query(qs.stringify(filters, {arrayFormat: 'bracket'}))
     .set('Authorization', token)
     .then((res) => res.body);
@@ -195,7 +196,7 @@ export const fetchCustomer = async (
   const {expand = []} = query;
 
   return request
-    .get(`/api/customers/${id}`)
+    .get(`${BASE_URL}/api/customers/${id}`)
     .query(qs.stringify({expand}, {arrayFormat: 'bracket'}))
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -211,7 +212,7 @@ export const updateCustomer = async (
   }
 
   return request
-    .put(`/api/customers/${id}`)
+    .put(`${BASE_URL}/api/customers/${id}`)
     .set('Authorization', token)
     .send({
       customer: updates,
@@ -225,7 +226,7 @@ export const deleteCustomer = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .delete(`/api/customers/${id}`)
+    .delete(`${BASE_URL}/api/customers/${id}`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -239,7 +240,7 @@ export const createNewCompany = async (
   }
 
   return request
-    .post(`/api/companies`)
+    .post(`${BASE_URL}/api/companies`)
     .send({company: params})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -251,7 +252,7 @@ export const fetchCompanies = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/companies`)
+    .get(`${BASE_URL}/api/companies`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -262,7 +263,7 @@ export const fetchCompany = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/companies/${id}`)
+    .get(`${BASE_URL}/api/companies/${id}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -277,7 +278,7 @@ export const updateCompany = async (
   }
 
   return request
-    .put(`/api/companies/${id}`)
+    .put(`${BASE_URL}/api/companies/${id}`)
     .set('Authorization', token)
     .send({company: updates})
     .then((res) => res.body.data);
@@ -288,7 +289,7 @@ export const deleteCompany = async (id: string, token = getAccessToken()) => {
     throw new Error('Invalid token!');
   }
 
-  return request.delete(`/api/companies/${id}`).set('Authorization', token);
+  return request.delete(`${BASE_URL}/api/companies/${id}`).set('Authorization', token);
 };
 
 export const createNewConversation = async (
@@ -301,7 +302,7 @@ export const createNewConversation = async (
   }
 
   return request
-    .post(`/api/conversations`)
+    .post(`${BASE_URL}/api/conversations`)
     .set('Authorization', token)
     .send({
       conversation: {
@@ -320,7 +321,7 @@ export const fetchAccountInfo = async (
   }
 
   return request
-    .get(`/api/accounts/me`)
+    .get(`${BASE_URL}/api/accounts/me`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -334,7 +335,7 @@ export const updateAccountInfo = async (
   }
 
   return request
-    .put(`/api/accounts/me`)
+    .put(`${BASE_URL}/api/accounts/me`)
     .set('Authorization', token)
     .send({
       account: updates,
@@ -348,7 +349,7 @@ export const deleteMyAccount = async (token = getAccessToken()) => {
   }
 
   return request
-    .delete(`/api/accounts/me`)
+    .delete(`${BASE_URL}/api/accounts/me`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -359,7 +360,7 @@ export const fetchUserProfile = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/profile`)
+    .get(`${BASE_URL}/api/profile`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -373,7 +374,7 @@ export const updateUserProfile = async (
   }
 
   return request
-    .put(`/api/profile`)
+    .put(`${BASE_URL}/api/profile`)
     .set('Authorization', token)
     .send({
       user_profile: updates,
@@ -432,7 +433,7 @@ export const countUnreadConversations = async (
   }
 
   return request
-    .get(`/api/conversations/unread`)
+    .get(`${BASE_URL}/api/conversations/unread`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -446,7 +447,7 @@ export const fetchConversations = async (
   }
 
   return request
-    .get(`/api/conversations`)
+    .get(`${BASE_URL}/api/conversations`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body);
@@ -548,7 +549,7 @@ export const fetchConversation = async (
   }
 
   return request
-    .get(`/api/conversations/${id}`)
+    .get(`${BASE_URL}/api/conversations/${id}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -562,7 +563,7 @@ export const fetchPreviousConversation = async (
   }
 
   return request
-    .get(`/api/conversations/${id}/previous`)
+    .get(`${BASE_URL}/api/conversations/${id}/previous`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -576,7 +577,7 @@ export const fetchRelatedConversations = async (
   }
 
   return request
-    .get(`/api/conversations/${id}/related`)
+    .get(`${BASE_URL}/api/conversations/${id}/related`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -590,7 +591,7 @@ export const fetchSlackConversationThreads = async (
   }
 
   return request
-    .get(`/api/slack_conversation_threads`)
+    .get(`${BASE_URL}/api/slack_conversation_threads`)
     .query({conversation_id: conversationId})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -605,7 +606,7 @@ export const generateShareConversationToken = async (
   }
 
   return request
-    .post(`/api/conversations/${conversationId}/share`)
+    .post(`${BASE_URL}/api/conversations/${conversationId}/share`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -619,7 +620,7 @@ export const fetchSharedConversation = async (
   }
 
   return request
-    .get(`/api/conversations/shared`)
+    .get(`${BASE_URL}/api/conversations/shared`)
     .query({token, conversation_id: id})
     .then((res) => res.body.data);
 };
@@ -634,7 +635,7 @@ export const updateConversation = async (
   }
 
   return request
-    .put(`/api/conversations/${conversationId}`)
+    .put(`${BASE_URL}/api/conversations/${conversationId}`)
     .set('Authorization', token)
     .send(updates)
     .then((res) => res.body.data);
@@ -649,7 +650,7 @@ export const deleteConversation = async (
   }
 
   return request
-    .delete(`/api/conversations/${conversationId}`)
+    .delete(`${BASE_URL}/api/conversations/${conversationId}`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -663,7 +664,7 @@ export const archiveConversation = async (
   }
 
   return request
-    .post(`/api/conversations/${conversationId}/archive`)
+    .post(`${BASE_URL}/api/conversations/${conversationId}/archive`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -677,7 +678,7 @@ export const createNewMessage = async (
   }
 
   return request
-    .post(`/api/messages`)
+    .post(`${BASE_URL}/api/messages`)
     .set('Authorization', token)
     .send({
       message: {
@@ -694,7 +695,7 @@ export const countMessages = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/messages/count`)
+    .get(`${BASE_URL}/api/messages/count`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -708,7 +709,7 @@ export const countAllConversations = async (
   }
 
   return request
-    .get(`/api/conversations/count`)
+    .get(`${BASE_URL}/api/conversations/count`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -719,7 +720,7 @@ export const fetchCustomerConversations = async (
   accountId: string
 ) => {
   return request
-    .get(`/api/conversations/customer`)
+    .get(`${BASE_URL}/api/conversations/customer`)
     .query({customer_id: customerId, account_id: accountId})
     .then((res) => res.body.data);
 };
@@ -730,7 +731,7 @@ export const generateUserInvitation = async (token = getAccessToken()) => {
   }
 
   return request
-    .post(`/api/user_invitations`)
+    .post(`${BASE_URL}/api/user_invitations`)
     .send({user_invitation: {}})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -745,7 +746,7 @@ export const sendUserInvitationEmail = async (
   }
 
   return request
-    .post(`/api/user_invitation_emails`)
+    .post(`${BASE_URL}/api/user_invitation_emails`)
     .send({to_address})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -764,7 +765,7 @@ export const sendSlackNotification = async (
   }
 
   return request
-    .post(`/api/slack/notify`)
+    .post(`${BASE_URL}/api/slack/notify`)
     .send(params)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -780,7 +781,7 @@ export const fetchSlackAuthorization = async (
   }
 
   return request
-    .get(`/api/slack/authorization`)
+    .get(`${BASE_URL}/api/slack/authorization`)
     .query({type, ...query})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -796,7 +797,7 @@ export const listSlackAuthorizations = async (
   }
 
   return request
-    .get(`/api/slack/authorizations`)
+    .get(`${BASE_URL}/api/slack/authorizations`)
     .query({type, ...query})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -812,7 +813,7 @@ export const updateSlackAuthorizationSettings = async (
   }
 
   return request
-    .post(`/api/slack/authorizations/${authorizationId}/settings`)
+    .post(`${BASE_URL}/api/slack/authorizations/${authorizationId}/settings`)
     .send({settings})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -827,7 +828,7 @@ export const deleteSlackAuthorization = async (
   }
 
   return request
-    .delete(`/api/slack/authorizations/${authorizationId}`)
+    .delete(`${BASE_URL}/api/slack/authorizations/${authorizationId}`)
     .set('Authorization', token);
 };
 
@@ -840,7 +841,7 @@ export const fetchSlackChannels = async (
   }
 
   return request
-    .get(`/api/slack/channels`)
+    .get(`${BASE_URL}/api/slack/channels`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -855,7 +856,7 @@ export const fetchMattermostChannels = async (
   }
 
   return request
-    .get(`/api/mattermost/channels`)
+    .get(`${BASE_URL}/api/mattermost/channels`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -870,7 +871,7 @@ export const createMattermostAuthorization = async (
   }
 
   return request
-    .post(`/api/mattermost/auth`)
+    .post(`${BASE_URL}/api/mattermost/auth`)
     .send({authorization})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -885,7 +886,7 @@ export const fetchMattermostAuthorization = async (
   }
 
   return request
-    .get(`/api/mattermost/authorization`)
+    .get(`${BASE_URL}/api/mattermost/authorization`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -900,7 +901,7 @@ export const deleteMattermostAuthorization = async (
   }
 
   return request
-    .delete(`/api/mattermost/authorizations/${authorizationId}`)
+    .delete(`${BASE_URL}/api/mattermost/authorizations/${authorizationId}`)
     .set('Authorization', token);
 };
 
@@ -913,7 +914,7 @@ export const createTwilioAuthorization = async (
   }
 
   return request
-    .post(`/api/twilio/auth`)
+    .post(`${BASE_URL}/api/twilio/auth`)
     .send({authorization})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -928,7 +929,7 @@ export const fetchTwilioAuthorization = async (
   }
 
   return request
-    .get(`/api/twilio/authorization`)
+    .get(`${BASE_URL}/api/twilio/authorization`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -943,7 +944,7 @@ export const deleteTwilioAuthorization = async (
   }
 
   return request
-    .delete(`/api/twilio/authorizations/${authorizationId}`)
+    .delete(`${BASE_URL}/api/twilio/authorizations/${authorizationId}`)
     .set('Authorization', token);
 };
 
@@ -956,7 +957,7 @@ export const sendTwilioSms = async (
   }
 
   return request
-    .post(`/api/twilio/send`)
+    .post(`${BASE_URL}/api/twilio/send`)
     .send(params)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -971,7 +972,7 @@ export const fetchGoogleAuthorization = async (
   }
 
   return request
-    .get(`/api/google/authorization`)
+    .get(`${BASE_URL}/api/google/authorization`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -986,7 +987,7 @@ export const deleteGoogleAuthorization = async (
   }
 
   return request
-    .delete(`/api/google/authorizations/${authorizationId}`)
+    .delete(`${BASE_URL}/api/google/authorizations/${authorizationId}`)
     .set('Authorization', token);
 };
 
@@ -996,7 +997,7 @@ export const fetchGithubAuthorization = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/github/authorization`)
+    .get(`${BASE_URL}/api/github/authorization`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1010,7 +1011,7 @@ export const deleteGithubAuthorization = async (
   }
 
   return request
-    .delete(`/api/github/authorizations/${authorizationId}`)
+    .delete(`${BASE_URL}/api/github/authorizations/${authorizationId}`)
     .set('Authorization', token);
 };
 
@@ -1020,7 +1021,7 @@ export const fetchGithubRepos = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/github/repos`)
+    .get(`${BASE_URL}/api/github/repos`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1038,7 +1039,7 @@ export const findGithubIssues = async (
   }
 
   return request
-    .get(`/api/github/issues`)
+    .get(`${BASE_URL}/api/github/issues`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1053,7 +1054,7 @@ export const fetchGmailProfile = async (
   }
 
   return request
-    .get(`/api/gmail/profile`)
+    .get(`${BASE_URL}/api/gmail/profile`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1074,7 +1075,7 @@ export const sendGmailNotification = async (
   }
 
   return request
-    .post(`/api/gmail/send`)
+    .post(`${BASE_URL}/api/gmail/send`)
     .send({recipient, subject, message})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1086,7 +1087,7 @@ export const fetchHubspotAuthorization = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/hubspot/authorization`)
+    .get(`${BASE_URL}/api/hubspot/authorization`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1100,7 +1101,7 @@ export const createHubspotContact = async (
   }
 
   return request
-    .post(`/api/hubspot/contacts`)
+    .post(`${BASE_URL}/api/hubspot/contacts`)
     .send(params)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1115,7 +1116,7 @@ export const fetchHubspotContacts = async (
   }
 
   return request
-    .get(`/api/hubspot/contacts`)
+    .get(`${BASE_URL}/api/hubspot/contacts`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1139,7 +1140,7 @@ export const deleteHubspotAuthorization = async (
   }
 
   return request
-    .delete(`/api/hubspot/authorizations/${authorizationId}`)
+    .delete(`${BASE_URL}/api/hubspot/authorizations/${authorizationId}`)
     .set('Authorization', token);
 };
 
@@ -1149,7 +1150,7 @@ export const fetchIntercomAuthorization = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/intercom/authorization`)
+    .get(`${BASE_URL}/api/intercom/authorization`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1163,7 +1164,7 @@ export const createIntercomContact = async (
   }
 
   return request
-    .post(`/api/intercom/contacts`)
+    .post(`${BASE_URL}/api/intercom/contacts`)
     .send(params)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1178,7 +1179,7 @@ export const fetchIntercomContacts = async (
   }
 
   return request
-    .get(`/api/intercom/contacts`)
+    .get(`${BASE_URL}/api/intercom/contacts`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1202,7 +1203,7 @@ export const deleteIntercomAuthorization = async (
   }
 
   return request
-    .delete(`/api/intercom/authorizations/${authorizationId}`)
+    .delete(`${BASE_URL}/api/intercom/authorizations/${authorizationId}`)
     .set('Authorization', token);
 };
 
@@ -1212,7 +1213,7 @@ export const fetchEventSubscriptions = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/event_subscriptions`)
+    .get(`${BASE_URL}/api/event_subscriptions`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1226,7 +1227,7 @@ export const verifyWebhookUrl = async (
   }
 
   return request
-    .post(`/api/event_subscriptions/verify`)
+    .post(`${BASE_URL}/api/event_subscriptions/verify`)
     .set('Authorization', token)
     .send({url})
     .then((res) => res.body.data);
@@ -1241,7 +1242,7 @@ export const createEventSubscription = async (
   }
 
   return request
-    .post(`/api/event_subscriptions`)
+    .post(`${BASE_URL}/api/event_subscriptions`)
     .set('Authorization', token)
     .send({
       event_subscription: params,
@@ -1259,7 +1260,7 @@ export const updateEventSubscription = async (
   }
 
   return request
-    .put(`/api/event_subscriptions/${id}`)
+    .put(`${BASE_URL}/api/event_subscriptions/${id}`)
     .set('Authorization', token)
     .send({
       event_subscription: updates,
@@ -1276,7 +1277,7 @@ export const deleteEventSubscription = async (
   }
 
   return request
-    .delete(`/api/event_subscriptions/${id}`)
+    .delete(`${BASE_URL}/api/event_subscriptions/${id}`)
     .set('Authorization', token);
 };
 
@@ -1289,7 +1290,7 @@ export const fetchForwardingAddresses = async (
   }
 
   return request
-    .get(`/api/forwarding_addresses`)
+    .get(`${BASE_URL}/api/forwarding_addresses`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1304,7 +1305,7 @@ export const createForwardingAddress = async (
   }
 
   return request
-    .post(`/api/forwarding_addresses`)
+    .post(`${BASE_URL}/api/forwarding_addresses`)
     .set('Authorization', token)
     .send({
       forwarding_address: params,
@@ -1322,7 +1323,7 @@ export const updateForwardingAddress = async (
   }
 
   return request
-    .put(`/api/forwarding_addresses/${id}`)
+    .put(`${BASE_URL}/api/forwarding_addresses/${id}`)
     .set('Authorization', token)
     .send({
       forwarding_address: updates,
@@ -1339,7 +1340,7 @@ export const deleteForwardingAddress = async (
   }
 
   return request
-    .delete(`/api/forwarding_addresses/${id}`)
+    .delete(`${BASE_URL}/api/forwarding_addresses/${id}`)
     .set('Authorization', token);
 };
 
@@ -1359,7 +1360,7 @@ export const authorizeSlackIntegration = async (
   }
 
   return request
-    .get(`/api/slack/oauth`)
+    .get(`${BASE_URL}/api/slack/oauth`)
     .query(params)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1374,7 +1375,7 @@ export const authorizeGmailIntegration = async (
   }
 
   return request
-    .get(`/api/gmail/oauth`)
+    .get(`${BASE_URL}/api/gmail/oauth`)
     .query({code})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1389,7 +1390,7 @@ export const authorizeGoogleIntegration = async (
   }
 
   return request
-    .get(`/api/google/oauth`)
+    .get(`${BASE_URL}/api/google/oauth`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1404,7 +1405,7 @@ export const authorizeGithubIntegration = async (
   }
 
   return request
-    .get(`/api/github/oauth`)
+    .get(`${BASE_URL}/api/github/oauth`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body);
@@ -1419,7 +1420,7 @@ export const authorizeHubspotIntegration = async (
   }
 
   return request
-    .get(`/api/hubspot/oauth`)
+    .get(`${BASE_URL}/api/hubspot/oauth`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body);
@@ -1434,7 +1435,7 @@ export const authorizeIntercomIntegration = async (
   }
 
   return request
-    .get(`/api/intercom/callback`)
+    .get(`${BASE_URL}/api/intercom/callback`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body);
@@ -1452,7 +1453,7 @@ export const fetchWidgetSettings = async (
   }
 
   return request
-    .get(`/api/widget_settings`)
+    .get(`${BASE_URL}/api/widget_settings`)
     .query(query)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1467,7 +1468,7 @@ export const updateWidgetSettings = async (
   }
 
   return request
-    .put(`/api/widget_settings`)
+    .put(`${BASE_URL}/api/widget_settings`)
     .send({widget_settings: widgetSettingsParams})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1479,7 +1480,7 @@ export const fetchDefaultPaymentMethod = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/payment_methods`)
+    .get(`${BASE_URL}/api/payment_methods`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1490,7 +1491,7 @@ export const fetchBillingInfo = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/billing`)
+    .get(`${BASE_URL}/api/billing`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1504,7 +1505,7 @@ export const createSubscriptionPlan = async (
   }
 
   return request
-    .post(`/api/billing`)
+    .post(`${BASE_URL}/api/billing`)
     .send({plan})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1519,7 +1520,7 @@ export const updateSubscriptionPlan = async (
   }
 
   return request
-    .put(`/api/billing`)
+    .put(`${BASE_URL}/api/billing`)
     .send({plan})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1531,7 +1532,7 @@ export const cancelSubscriptionPlan = async (token = getAccessToken()) => {
   }
 
   return request
-    .delete(`/api/billing`)
+    .delete(`${BASE_URL}/api/billing`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1545,7 +1546,7 @@ export const createPaymentMethod = async (
   }
 
   return request
-    .post(`/api/payment_methods`)
+    .post(`${BASE_URL}/api/payment_methods`)
     .send({payment_method: paymentMethod})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1557,7 +1558,7 @@ export const fetchAccountUsers = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/users`)
+    .get(`${BASE_URL}/api/users`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1571,7 +1572,7 @@ export const fetchAccountUser = async (
   }
 
   return request
-    .get(`/api/users/${id}`)
+    .get(`${BASE_URL}/api/users/${id}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1585,7 +1586,7 @@ export const disableAccountUser = async (
   }
 
   return request
-    .post(`/api/users/${userId}/disable`)
+    .post(`${BASE_URL}/api/users/${userId}/disable`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1600,7 +1601,7 @@ export const setAccountUserRole = async (
   }
 
   return request
-    .put(`/api/users/${userId}/role`)
+    .put(`${BASE_URL}/api/users/${userId}/role`)
     .set('Authorization', token)
     .send({role})
     .then((res) => res.body.data);
@@ -1615,7 +1616,7 @@ export const enableAccountUser = async (
   }
 
   return request
-    .post(`/api/users/${userId}/enable`)
+    .post(`${BASE_URL}/api/users/${userId}/enable`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1629,7 +1630,7 @@ export const archiveAccountUser = async (
   }
 
   return request
-    .post(`/api/users/${userId}/archive`)
+    .post(`${BASE_URL}/api/users/${userId}/archive`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1671,7 +1672,7 @@ export const createCustomerNote = async (
   }
 
   return request
-    .post(`/api/notes`)
+    .post(`${BASE_URL}/api/notes`)
     .set('Authorization', token)
     .send({
       note: {
@@ -1690,7 +1691,7 @@ export const deleteCustomerNote = async (
     throw new Error('Invalid token!');
   }
 
-  return request.delete(`/api/notes/${noteId}`).set('Authorization', token);
+  return request.delete(`${BASE_URL}/api/notes/${noteId}`).set('Authorization', token);
 };
 
 export const fetchAllTags = async (token = getAccessToken()) => {
@@ -1699,7 +1700,7 @@ export const fetchAllTags = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/tags`)
+    .get(`${BASE_URL}/api/tags`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1710,7 +1711,7 @@ export const fetchTagById = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/tags/${id}`)
+    .get(`${BASE_URL}/api/tags/${id}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1724,7 +1725,7 @@ export const createTag = async (
   }
 
   return request
-    .post(`/api/tags`)
+    .post(`${BASE_URL}/api/tags`)
     .send({tag})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1740,7 +1741,7 @@ export const updateTag = async (
   }
 
   return request
-    .put(`/api/tags/${id}`)
+    .put(`${BASE_URL}/api/tags/${id}`)
     .send({tag})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1752,7 +1753,7 @@ export const deleteTag = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .delete(`/api/tags/${id}`)
+    .delete(`${BASE_URL}/api/tags/${id}`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -1767,7 +1768,7 @@ export const addConversationTag = async (
   }
 
   return request
-    .post(`/api/conversations/${conversationId}/tags`)
+    .post(`${BASE_URL}/api/conversations/${conversationId}/tags`)
     .send({tag_id: tagId})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1783,7 +1784,7 @@ export const removeConversationTag = async (
   }
 
   return request
-    .delete(`/api/conversations/${conversationId}/tags/${tagId}`)
+    .delete(`${BASE_URL}/api/conversations/${conversationId}/tags/${tagId}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1798,7 +1799,7 @@ export const addCustomerTag = async (
   }
 
   return request
-    .post(`/api/customers/${customerId}/tags`)
+    .post(`${BASE_URL}/api/customers/${customerId}/tags`)
     .send({tag_id: tagId})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1814,7 +1815,7 @@ export const removeCustomerTag = async (
   }
 
   return request
-    .delete(`/api/customers/${customerId}/tags/${tagId}`)
+    .delete(`${BASE_URL}/api/customers/${customerId}/tags/${tagId}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1828,7 +1829,7 @@ export const fetchAllIssues = async (
   }
 
   return request
-    .get(`/api/issues`)
+    .get(`${BASE_URL}/api/issues`)
     .set('Authorization', token)
     .query(query)
     .then((res) => res.body.data);
@@ -1840,7 +1841,7 @@ export const fetchIssueById = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/issues/${id}`)
+    .get(`${BASE_URL}/api/issues/${id}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1854,7 +1855,7 @@ export const createIssue = async (
   }
 
   return request
-    .post(`/api/issues`)
+    .post(`${BASE_URL}/api/issues`)
     .send({issue})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1870,7 +1871,7 @@ export const updateIssue = async (
   }
 
   return request
-    .put(`/api/issues/${id}`)
+    .put(`${BASE_URL}/api/issues/${id}`)
     .send({issue})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1882,7 +1883,7 @@ export const deleteIssue = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .delete(`/api/issues/${id}`)
+    .delete(`${BASE_URL}/api/issues/${id}`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -1897,7 +1898,7 @@ export const addCustomerIssue = async (
   }
 
   return request
-    .post(`/api/customers/${customerId}/issues`)
+    .post(`${BASE_URL}/api/customers/${customerId}/issues`)
     .send({issue_id: issueId})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -1913,7 +1914,7 @@ export const removeCustomerIssue = async (
   }
 
   return request
-    .delete(`/api/customers/${customerId}/issues/${issueId}`)
+    .delete(`${BASE_URL}/api/customers/${customerId}/issues/${issueId}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -1934,7 +1935,7 @@ export const fetchBrowserSessions = async (
   }
 
   return request
-    .get(`/api/browser_sessions`)
+    .get(`${BASE_URL}/api/browser_sessions`)
     .query(
       qs.stringify(
         {
@@ -1959,7 +1960,7 @@ export const countBrowserSessions = async (
   }
 
   return request
-    .get(`/api/browser_sessions/count`)
+    .get(`${BASE_URL}/api/browser_sessions/count`)
     .query(
       qs.stringify(
         {
@@ -1982,7 +1983,7 @@ export const fetchBrowserSession = async (
   }
 
   return request
-    .get(`/api/browser_sessions/${id}`)
+    .get(`${BASE_URL}/api/browser_sessions/${id}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -2001,7 +2002,7 @@ export const fetchReportingData = async (
   }
 
   return request
-    .get(`/api/reporting`)
+    .get(`${BASE_URL}/api/reporting`)
     .query(filters)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2013,7 +2014,7 @@ export const fetchPersonalApiKeys = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/personal_api_keys`)
+    .get(`${BASE_URL}/api/personal_api_keys`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -2027,7 +2028,7 @@ export const createPersonalApiKey = async (
   }
 
   return request
-    .post(`/api/personal_api_keys`)
+    .post(`${BASE_URL}/api/personal_api_keys`)
     .send({label})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2042,7 +2043,7 @@ export const deletePersonalApiKey = async (
   }
 
   return request
-    .delete(`/api/personal_api_keys/${id}`)
+    .delete(`${BASE_URL}/api/personal_api_keys/${id}`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -2055,7 +2056,7 @@ export const getOnboardingStatus = async (
   }
 
   return request
-    .get(`/api/onboarding_status`)
+    .get(`${BASE_URL}/api/onboarding_status`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -2066,7 +2067,7 @@ export const fetchCannedResponses = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/canned_responses`)
+    .get(`${BASE_URL}/api/canned_responses`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -2080,7 +2081,7 @@ export const createCannedResponse = async (
   }
 
   return request
-    .post(`/api/canned_responses`)
+    .post(`${BASE_URL}/api/canned_responses`)
     .send({canned_response: params})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2096,7 +2097,7 @@ export const updateCannedResponse = async (
   }
 
   return request
-    .put(`/api/canned_responses/${id}`)
+    .put(`${BASE_URL}/api/canned_responses/${id}`)
     .send({canned_response: updates})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2111,7 +2112,7 @@ export const deleteCannedResponse = async (
   }
 
   return request
-    .delete(`/api/canned_responses/${id}`)
+    .delete(`${BASE_URL}/api/canned_responses/${id}`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -2122,7 +2123,7 @@ export const fetchLambdas = async (token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/lambdas`)
+    .get(`${BASE_URL}/api/lambdas`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -2133,7 +2134,7 @@ export const fetchLambda = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .get(`/api/lambdas/${id}`)
+    .get(`${BASE_URL}/api/lambdas/${id}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -2147,7 +2148,7 @@ export const createNewLambda = async (
   }
 
   return request
-    .post(`/api/lambdas`)
+    .post(`${BASE_URL}/api/lambdas`)
     .send({lambda: params})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2163,7 +2164,7 @@ export const updateLambda = async (
   }
 
   return request
-    .put(`/api/lambdas/${id}`)
+    .put(`${BASE_URL}/api/lambdas/${id}`)
     .send({lambda: updates})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2175,7 +2176,7 @@ export const deleteLambda = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .delete(`/api/lambdas/${id}`)
+    .delete(`${BASE_URL}/api/lambdas/${id}`)
     .set('Authorization', token)
     .then((res) => res.body);
 };
@@ -2190,7 +2191,7 @@ export const deployLambda = async (
   }
 
   return request
-    .post(`/api/lambdas/${id}/deploy`)
+    .post(`${BASE_URL}/api/lambdas/${id}/deploy`)
     .send(params)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2206,7 +2207,7 @@ export const invokeLambda = async (
   }
 
   return request
-    .post(`/api/lambdas/${id}/invoke`)
+    .post(`${BASE_URL}/api/lambdas/${id}/invoke`)
     .send(params)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2221,7 +2222,7 @@ export const sendAdminNotification = async (
   }
 
   return request
-    .post(`/api/admin/notifications`)
+    .post(`${BASE_URL}/api/admin/notifications`)
     .send(params)
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2235,7 +2236,7 @@ export const fetchInboxes = async (
   }
 
   return request
-    .get(`/api/inboxes`)
+    .get(`${BASE_URL}/api/inboxes`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -2248,7 +2249,7 @@ export const fetchPrimaryInbox = async (
   }
 
   return request
-    .get(`/api/inboxes/primary`)
+    .get(`${BASE_URL}/api/inboxes/primary`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -2262,7 +2263,7 @@ export const fetchInbox = async (
   }
 
   return request
-    .get(`/api/inboxes/${id}`)
+    .get(`${BASE_URL}/api/inboxes/${id}`)
     .set('Authorization', token)
     .then((res) => res.body.data);
 };
@@ -2276,7 +2277,7 @@ export const createInbox = async (
   }
 
   return request
-    .post(`/api/inboxes`)
+    .post(`${BASE_URL}/api/inboxes`)
     .send({inbox: params})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2292,7 +2293,7 @@ export const updateInbox = async (
   }
 
   return request
-    .put(`/api/inboxes/${id}`)
+    .put(`${BASE_URL}/api/inboxes/${id}`)
     .send({inbox: updates})
     .set('Authorization', token)
     .then((res) => res.body.data);
@@ -2304,7 +2305,7 @@ export const deleteInbox = async (id: string, token = getAccessToken()) => {
   }
 
   return request
-    .delete(`/api/inboxes/${id}`)
+    .delete(`${BASE_URL}/api/inboxes/${id}`)
     .set('Authorization', token)
     .then((res) => res.body);
 };

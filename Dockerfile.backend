@@ -6,7 +6,8 @@ RUN apk add --no-cache git make gcc libc-dev python3 curl bash ncurses-libs node
 WORKDIR /app
 
 # Copy mix files
-COPY mix.exs mix.lock ./
+COPY mix.exs ./
+COPY mix.lock* ./
 COPY config config
 
 # Get dependencies

@@ -1,12 +1,54 @@
-# Utiliser l'image officielle Papercups
-FROM papercups/papercups:latest
+# Builder stage
+FROM elixir:1.11-alpine AS builder
 
-# Variables d'environnement
+RUN apk add --no-cache git make gcc libc-dev python3 curl bash ncurses-libs nodejs npm
+
+WORKDIR /app
+
 ENV MIX_ENV=prod
-ENV PORT=4000
 
-# Exposer le port
+# Copy mix files
+COPY mix.exs ./
+COPY mix.lock* ./
+COPY config config
+
+# Get dependencies
+RUN mix local.hex --force && \
+    mix local.rebar --force && \
+    mix deps.get --only prod && \
+    mix deps.compile
+
+# Copy assets
+COPY assets assets
+ENV NODE_OPTIONS=--openssl-legacy-provider
+RUN npm install --prefix=assets && \
+    npm run build --prefix=assets
+
+# Copy source
+COPY priv priv
+COPY lib lib
+
+# Compile and digest
+RUN mix compile && \
+    mix phx.digest
+
+# Build release
+RUN mix release
+
+# Runtime stage
+FROM alpine:3.14
+
+RUN apk add --no-cache openssl bash ncurses-libs
+
+WORKDIR /app
+
+# Copy release from builder
+COPY --from=builder /app/_build/prod/rel/chat_api ./
+COPY docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Expose port
 EXPOSE 4000
 
-# Script de démarrage complet avec création DB, migrations et lancement
+# Run the release
 CMD ["/bin/sh", "-c", "sleep 5 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh run"]

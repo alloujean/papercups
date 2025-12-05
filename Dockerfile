@@ -28,7 +28,6 @@ ENV AWS_REGION=$AWS_REGION
 ENV PAPERCUPS_STRIPE_SECRET=$PAPERCUPS_STRIPE_SECRET
 
 WORKDIR /app
-RUN mkdir /app
 
 # -----------------------------
 # Client side

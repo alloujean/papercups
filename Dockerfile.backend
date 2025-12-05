@@ -1,5 +1,5 @@
 # Builder stage
-FROM elixir:1.14-alpine AS builder
+FROM elixir:1.13-alpine AS builder
 
 RUN apk add --no-cache git make gcc libc-dev python3 curl bash ncurses-libs nodejs npm
 

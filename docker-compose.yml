@@ -1,55 +1,49 @@
 version: "3.8"
 
 services:
-  papercups:
-    image: papercups/papercups:latest
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     restart: always
     depends_on:
       - db
-    command: >
-      sh -c "sleep 10 &&
-      /entrypoint.sh db createdb &&
-      /entrypoint.sh db migrate &&
-      echo 'running' &&
-      /entrypoint.sh run"
     environment:
-      DATABASE_URL: "ecto://postgres:postgres@db/postgres"
-      SECRET_KEY_BASE: "dvPPvOjpgX2Wk8Y3ONrqWsgM9ZtU4sSrs4l/5CFD1sLm4H+CjLU+EidjNGuSz7bz"
-
-      BACKEND_URL: "https://${DOMAIN_API}"
-      REACT_APP_URL: "https://${DOMAIN_FRONT}"
-
+      DATABASE_URL: "ecto://postgres:postgres@db/papercups"
+      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
+      BACKEND_URL: "${BACKEND_URL}"
+      REACT_APP_URL: "${REACT_APP_URL}"
       MIX_ENV: "prod"
       REQUIRE_DB_SSL: "false"
-      REACT_APP_FILE_UPLOADS_ENABLED: 1
-
+      USE_IP_V6: "false"
     labels:
       traefik.enable: "true"
-
-      # FRONT (HTTP → HTTPS)
-      traefik.http.routers.papercups_front_http.rule: "Host(`${DOMAIN_FRONT}`)"
-      traefik.http.routers.papercups_front_http.entrypoints: "web"
-      traefik.http.routers.papercups_front_http.middlewares: "redirect-to-https"
-
-      # FRONT (HTTPS)
-      traefik.http.routers.papercups_front_https.rule: "Host(`${DOMAIN_FRONT}`)"
-      traefik.http.routers.papercups_front_https.entrypoints: "websecure"
-      traefik.http.routers.papercups_front_https.tls.certresolver: "letsencrypt"
-      traefik.http.services.papercups_front.loadbalancer.server.port: "3000"
-
-      # Middleware redirection
-      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: "https"
-
-      # API (HTTP)
       traefik.http.routers.papercups_api_http.rule: "Host(`${DOMAIN_API}`)"
       traefik.http.routers.papercups_api_http.entrypoints: "web"
       traefik.http.routers.papercups_api_http.middlewares: "redirect-to-https"
-
-      # API (HTTPS)
       traefik.http.routers.papercups_api_https.rule: "Host(`${DOMAIN_API}`)"
       traefik.http.routers.papercups_api_https.entrypoints: "websecure"
       traefik.http.routers.papercups_api_https.tls.certresolver: "letsencrypt"
       traefik.http.services.papercups_api.loadbalancer.server.port: "4000"
+      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: "https"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - backend
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.papercups_front_http.rule: "Host(`${DOMAIN_FRONT}`)"
+      traefik.http.routers.papercups_front_http.entrypoints: "web"
+      traefik.http.routers.papercups_front_http.middlewares: "redirect-to-https"
+      traefik.http.routers.papercups_front_https.rule: "Host(`${DOMAIN_FRONT}`)"
+      traefik.http.routers.papercups_front_https.entrypoints: "websecure"
+      traefik.http.routers.papercups_front_https.tls.certresolver: "letsencrypt"
+      traefik.http.services.papercups_front.loadbalancer.server.port: "80"
+      traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: "https"
 
   db:
     image: postgres:alpine

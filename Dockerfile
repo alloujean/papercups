@@ -23,6 +23,8 @@ COPY priv priv
 ENV NODE_OPTIONS=--openssl-legacy-provider
 
 # Build React
+ARG REACT_APP_URL=http://localhost:4000
+ENV REACT_APP_URL=$REACT_APP_URL
 RUN npm run build --prefix=assets
 
 # -----------------------------

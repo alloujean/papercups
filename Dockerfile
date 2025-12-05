@@ -23,7 +23,7 @@ COPY priv priv
 ENV NODE_OPTIONS=--openssl-legacy-provider
 
 # Build React
-ARG REACT_APP_URL=http://localhost:4000
+ARG REACT_APP_URL=http://messagerie-msg-back-dessp4-5c2245-136-112-175-192.traefik.me
 ENV REACT_APP_URL=$REACT_APP_URL
 RUN npm run build --prefix=assets
 

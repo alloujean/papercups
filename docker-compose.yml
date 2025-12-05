@@ -1,6 +1,32 @@
 version: "3.8"
 
+networks:
+  traefik:
+    external: true
+
 services:
+  traefik:
+    image: traefik:v2.10
+    restart: always
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
+    networks:
+      - traefik
   backend:
     build:
       context: .
@@ -16,6 +42,8 @@ services:
       MIX_ENV: "prod"
       REQUIRE_DB_SSL: "false"
       USE_IP_V6: "false"
+    networks:
+      - traefik
     labels:
       traefik.enable: "true"
       traefik.http.routers.papercups_api_http.rule: "Host(`${DOMAIN_API}`)"
@@ -31,9 +59,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        REACT_APP_URL: "${REACT_APP_URL}"
     restart: always
     depends_on:
       - backend
+    networks:
+      - traefik
     labels:
       traefik.enable: "true"
       traefik.http.routers.papercups_front_http.rule: "Host(`${DOMAIN_FRONT}`)"
